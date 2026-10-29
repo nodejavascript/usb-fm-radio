@@ -166,17 +166,24 @@ def og() -> Image.Image:
         tall = (x - 70) % 75 == 0
         d.line((x, H - 40, x, H - 40 - (46 if tall else 24)), fill=AMBER + (190 if tall else 80,), width=2)
 
-    x, y = 78, 150
-    f1 = font(66)
-    for line in wrap("A station is told from hiss by evidence, not by loudness.", f1, 900):
+    # 🔴 THE TEXT COLUMN STOPS WHERE THE MARK BEGINS. The mark is pasted at W-370, so the copy
+    # wraps at 690 and the headline is 60 px rather than 66: at 900 wide the old wrap ran the
+    # headline and the subtitle underneath the dial, and "USB FM radio in a container" is longer
+    # than the name this card carried before.
+    x, y = 78, 118
+    f1 = font(60)
+    for line in wrap("A station is told from hiss by evidence, not by loudness.", f1, 690):
         d.text((x, y), line, font=f1, fill=INK)
-        y += 76
+        y += 70
 
-    d.line((x, y + 22, x + 120, y + 22), fill=AMBER + (255,), width=4)
-    y += 60
-    d.text((x, y), "FM radio in a container · one Python file · MIT", font=font(34, False), fill=MUTED)
-    d.text((W - 78 - font(32).getlength("fm-radio.nodejavascript.com"), H - 120),
-           "fm-radio.nodejavascript.com", font=font(32), fill=AMBER)
+    d.line((x, y + 18, x + 120, y + 18), fill=AMBER + (255,), width=4)
+    y += 54
+    f2 = font(26, False)
+    for line in wrap("USB FM radio in a container · one Python file · MIT", f2, 690):
+        d.text((x, y), line, font=f2, fill=MUTED)
+        y += 34
+    d.text((W - 78 - font(32).getlength("usb-fm-radio.nodejavascript.com"), H - 120),
+           "usb-fm-radio.nodejavascript.com", font=font(32), fill=AMBER)
 
     # the mark, big, at the right
     mark = draw_dial(300)

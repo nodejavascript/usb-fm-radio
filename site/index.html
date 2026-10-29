@@ -3,12 +3,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>fm-radio.nodejavascript.com</title>
+    <title>usb-fm-radio.nodejavascript.com</title>
     <meta
       name="description"
       content="A local web page for a USB FM radio: it calls a channel a station only when the 19 kHz stereo pilot is really there, so the list stays short."
     />
-    <link rel="canonical" href="https://fm-radio.nodejavascript.com/" />
+    <link rel="canonical" href="https://usb-fm-radio.nodejavascript.com/" />
     <meta name="theme-color" content="#f5a524" />
     <meta name="color-scheme" content="dark" />
 
@@ -20,21 +20,21 @@
     <link rel="manifest" href="./manifest.webmanifest" />
 
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="fm-radio.nodejavascript.com" />
+    <meta property="og:site_name" content="usb-fm-radio.nodejavascript.com" />
     <meta property="og:title" content="A station is told from hiss by evidence" />
     <meta
       property="og:description"
       content="A web page for a USB FM radio. It scans the band and calls a channel a station only when the 19 kHz stereo pilot is actually present."
     />
-    <meta property="og:url" content="https://fm-radio.nodejavascript.com/" />
-    <meta property="og:image" content="https://fm-radio.nodejavascript.com/img/og.png" />
+    <meta property="og:url" content="https://usb-fm-radio.nodejavascript.com/" />
+    <meta property="og:image" content="https://usb-fm-radio.nodejavascript.com/img/og.png" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="A station is told from hiss by evidence" />
     <meta
       name="twitter:description"
       content="A web page for a USB FM radio. It calls a channel a station only when the 19 kHz stereo pilot is actually there."
     />
-    <meta name="twitter:image" content="https://fm-radio.nodejavascript.com/img/og.png" />
+    <meta name="twitter:image" content="https://usb-fm-radio.nodejavascript.com/img/og.png" />
 
     <link rel="stylesheet" href="./styles.css" />
 
@@ -44,12 +44,12 @@
         "@graph": [
           {
             "@type": "SoftwareApplication",
-            "name": "FM radio",
+            "name": "USB FM radio",
             "applicationCategory": "MultimediaApplication",
             "operatingSystem": "Linux (Docker)",
-            "description": "A local web page for a V4L2 USB FM tuner: tune, scan the band with a 19 kHz stereo-pilot test, and keep the stations you like.",
-            "url": "https://fm-radio.nodejavascript.com/",
-            "codeRepository": "https://github.com/nodejavascript/fm-radio",
+            "description": "A local web page for a V4L2 USB FM tuner: tune, scan the band with a 19 kHz stereo-pilot test, and keep the stations you like. Drives whatever receiver the Linux kernel exposes as a V4L2 radio device.",
+            "url": "https://usb-fm-radio.nodejavascript.com/",
+            "codeRepository": "https://github.com/nodejavascript/usb-fm-radio",
             "license": "https://opensource.org/license/mit",
             "isAccessibleForFree": true,
             "offers": { "@type": "Offer", "price": "0", "priceCurrency": "CAD" }
@@ -78,7 +78,7 @@
                 "name": "Which radios does it work with?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Any stick the Linux kernel already exposes as a V4L2 radio device at /dev/radio0 — that is what v4l2-ctl drives. The container cannot load a kernel module, so the driver must already be working on the host."
+                  "text": "Any receiver the Linux kernel already exposes as a V4L2 radio device at /dev/radio0 — the driver, not the brand, decides. The container cannot load a kernel module, so it must already be working on the host. The ten receiver drivers it is built to talk to are listed under What it plugs into."
                 }
               }
             ]
@@ -96,7 +96,7 @@
     <div class="dial" aria-hidden="true"></div>
 
     <header class="top">
-      <a class="brand" href="/" aria-label="fm-radio.nodejavascript.com — home">
+      <a class="brand" href="/" aria-label="usb-fm-radio.nodejavascript.com — home">
         <span class="mark" aria-hidden="true">
           <!-- 🔴 THE BAR DRAWS THE SITE'S OWN MARK, AND THAT MARK IS THE FAVICON'S DRAWING —
                part 15c. It was the family's shared `</>` glyph here, which a compliance run
@@ -144,7 +144,7 @@
           </svg>
         </span>
         <span class="brand-text">
-          <b>FM radio</b>
+          <b>USB FM radio</b>
           <small>nodejavascript.com</small>
         </span>
       </a>
@@ -161,7 +161,7 @@
           loud there. That is the whole idea, and it is why the list it produces is short.
         </p>
         <p class="cta">
-          <a class="btn primary" href="https://github.com/nodejavascript/fm-radio"
+          <a class="btn primary" href="https://github.com/nodejavascript/usb-fm-radio"
             ><svg class="gh-star" viewBox="0 0 16 16" aria-hidden="true"
               ><path
                 d="M8 1.4l1.98 4.2 4.42.5-3.3 3.05.9 4.45L8 11.4l-4 2.2.9-4.45L1.6 6.1l4.42-.5z"
@@ -293,7 +293,7 @@
         <h3>With docker compose</h3>
         <div class="code">
           <button class="copy" data-copy type="button">Copy</button>
-          <pre><code>cd fm-radio
+          <pre><code>cd usb-fm-radio
 docker compose up -d --build
 # open http://127.0.0.1:8150/</code></pre>
         </div>
@@ -308,18 +308,18 @@ docker compose up -d --build
         <h3>With plain docker</h3>
         <div class="code">
           <button class="copy" data-copy type="button">Copy</button>
-          <pre><code>docker build -t fm-radio .
-docker run -d --name fm-radio \
+          <pre><code>docker build -t usb-fm-radio .
+docker run -d --name usb-fm-radio \
   --device /dev/radio0:/dev/radio0 \
   -p 8150:8150 \
   -e RADIO_BIND=0.0.0.0 \
   -e RADIO_DATA=/data \
   -e PULSE_SERVER=unix:/pulse/native \
   -e XDG_RUNTIME_DIR=/pulse \
-  -v fm-radio-data:/data \
+  -v usb-fm-radio-data:/data \
   -v "${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/pulse/native:/pulse/native" \
   --restart unless-stopped \
-  fm-radio</code></pre>
+  usb-fm-radio</code></pre>
         </div>
         <p class="body small">
           <b><code>RADIO_BIND=0.0.0.0</code> is not optional in a container</b> — a published port
@@ -376,6 +376,70 @@ docker run -d --name fm-radio \
         </div>
       </section>
 
+      <section id="hardware">
+        <h2>What it plugs into</h2>
+        <p class="body">
+          <b>No chip is named inside the program.</b> It talks to whatever the kernel exposes at
+          <code>/dev/radio0</code> as a V4L2 radio device: it sets a frequency with
+          <code>v4l2-ctl --set-freq</code>, reads the device back, and captures the receiver's audio
+          from your audio server. Mute and volume happen in the audio server, not in the tuner. So the
+          list below is <i>the kernel's</i> list of FM receiver drivers, and every one of them is a
+          receiver: a tuner that takes a frequency, and demodulated audio to hand to the sound card.
+        </p>
+        <div class="tablewrap">
+          <table>
+            <thead>
+              <tr><th>Driver</th><th>The receiver it drives</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>radio-shark</code></td><td>Griffin radioSHARK, USB (FM tuner <code>tea575x</code>)</td></tr>
+              <tr><td><code>shark2</code></td><td>Griffin radioSHARK2, USB</td></tr>
+              <tr><td><code>radio-si470x-usb</code> · <code>radio-si470x-i2c</code></td><td>Silicon Labs Si4701/4702/4703 FM radios</td></tr>
+              <tr><td><code>radio-si476x</code></td><td>Silicon Labs Si4761/64/68 AM/FM (I2C, car-radio boards)</td></tr>
+              <tr><td><code>radio-tea5764</code></td><td>Philips TEA5764 (EZX phones)</td></tr>
+              <tr><td><code>dsbr100</code></td><td>D-Link DSB-R100 USB FM radio</td></tr>
+              <tr><td><code>radio-raremono</code></td><td>Thanko Raremono AM/FM/SW, USB</td></tr>
+              <tr><td><code>radio-ma901</code></td><td>Masterkit MA901 USB FM radio</td></tr>
+              <tr><td><code>radio-mr800</code></td><td>AverMedia MR 800 USB FM radio</td></tr>
+              <tr><td><code>radio-maxiradio</code></td><td>Guillemot Maxi Radio FM2000 (PCI card)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="body small">
+          Measured here on one of them — the radioSHARK, through <code>radio-shark</code> and
+          <code>tea575x</code>. The rest are the kernel's receiver drivers. <b>Not receivers, whatever
+          their name suggests:</b> <code>radio-keene</code> and <code>si4713</code> are FM
+          <i>transmitters</i>, and <code>tea575x</code>, <code>tef6862</code> and <code>saa7706h</code>
+          are tuner sub-devices used inside other drivers — none of them exposes a
+          <code>/dev/radioN</code> of its own.
+        </p>
+        <div class="cards">
+          <article>
+            <h3>A mono receiver would read as an empty band</h3>
+            <p>
+              The scan's whole test is the 19 kHz stereo pilot, so a tuner that never goes stereo has
+              nothing for it to find. The page would look broken when the radio is the limit.
+            </p>
+          </article>
+          <article>
+            <h3>No V4L2 driver, no support</h3>
+            <p>
+              Sticks driven from userspace over HID — some <code>RDA5807</code> and
+              <code>TEA5767</code> modules — never appear as <code>/dev/radio0</code>. Neither does any
+              SDR dongle: it hands over IQ samples and no demodulated audio at all.
+            </p>
+          </article>
+          <article>
+            <h3>The sound has to reach the audio server</h3>
+            <p>
+              An empty <code>RADIO_SOURCE</code> auto-picks the first <code>alsa_input.usb-…</code>
+              source, so a card tuner's input has to be named there by hand. A tuner whose audio goes
+              nowhere is a tuner this app cannot hear.
+            </p>
+          </article>
+        </div>
+      </section>
+
       <section id="list">
         <h2>What it heard here</h2>
         <p class="body">
@@ -426,10 +490,10 @@ docker run -d --name fm-radio \
           </dd>
           <dt>Which radios does it work with?</dt>
           <dd>
-            Any stick the Linux kernel already exposes as a V4L2 radio device at
-            <code>/dev/radio0</code>. The container cannot load a kernel module, so the driver — for one
-            common stick, <code>radio_shark</code> with <code>tea575x</code> — has to be working on the
-            host already.
+            Any receiver the Linux kernel already exposes as a V4L2 radio device at
+            <code>/dev/radio0</code> — the driver, not the brand, decides. The container cannot load a
+            kernel module, so it has to be working on the host already. The ten receiver drivers it is
+            built to talk to are listed under <a href="#hardware">What it plugs into</a>.
           </dd>
           <dt>What is it written in?</dt>
           <dd>
@@ -514,21 +578,21 @@ docker run -d --name fm-radio \
             <circle cx="32" cy="32" r="2.2" fill="#140f08" />
           </svg>
         </span>
-        <span><b>FM radio</b> · <a href="https://nodejavascript.com/">nodejavascript.com</a></span>
+        <span><b>USB FM radio</b> · <a href="https://nodejavascript.com/">nodejavascript.com</a></span>
       </div>
       <p class="footer-links">
-        <a href="https://github.com/nodejavascript/fm-radio"
+        <a href="https://github.com/nodejavascript/usb-fm-radio"
           ><svg class="gh-star" viewBox="0 0 16 16" aria-hidden="true"
             ><path
               d="M8 1.4l1.98 4.2 4.42.5-3.3 3.05.9 4.45L8 11.4l-4 2.2.9-4.45L1.6 6.1l4.42-.5z"
               ></path></svg
-          >github.com/nodejavascript/fm-radio</a
+          >github.com/nodejavascript/usb-fm-radio</a
         >
-        · <a href="https://github.com/nodejavascript/fm-radio/blob/main/LICENSE">MIT</a> ·
+        · <a href="https://github.com/nodejavascript/usb-fm-radio/blob/main/LICENSE">MIT</a> ·
         <a href="#privacy">Privacy</a> ·
         <button id="consentBtn" class="linkbtn" data-consent-open type="button">Cookie settings</button>
       </p>
-      <p class="copyright">© 2026 fm-radio.nodejavascript.com</p>
+      <p class="copyright">© 2026 usb-fm-radio.nodejavascript.com</p>
     </footer>
 
     <!-- 🔴 THE ANALYTICS TAG IS NOT IN THIS DOCUMENT. consent.js holds the measurement id

@@ -10,7 +10,7 @@
  *
  * Exit 0 = every check passed. Exit 1 = at least one did not, and it says which.
  */
-const HOST = "fm-radio.nodejavascript.com";
+const HOST = "usb-fm-radio.nodejavascript.com";
 const BASE = `https://${HOST}`;
 
 let failures = 0;
@@ -71,7 +71,7 @@ for (const [path, type] of [
   check("the sitemap names this host", xml.includes(`https://${HOST}/`));
   const { res: rr } = await head("/robots.txt");
   const robots = await rr.text();
-  check("robots.txt carries the Sitemap line", /Sitemap:\s*https:\/\/fm-radio\.nodejavascript\.com\/sitemap\.xml/.test(robots));
+  check("robots.txt carries the Sitemap line", /Sitemap:\s*https:\/\/usb-fm-radio\.nodejavascript\.com\/sitemap\.xml/.test(robots));
 }
 
 // 5 · the owner-exclusion rule at the origin: his own network is served a STUB for /consent.js,

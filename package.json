@@ -1,5 +1,5 @@
 {
-  "name": "fm-radio",
+  "name": "usb-fm-radio",
   "private": true,
   "version": "1.0.0",
   "description": "A local web page for a USB FM radio: tune it, scan the band with a 19 kHz stereo-pilot test, keep the stations you like.",

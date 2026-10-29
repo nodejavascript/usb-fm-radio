@@ -9,8 +9,8 @@
 services:
   radio:
     build: .
-    # image: ghcr.io/<you>/fm-radio:latest    # or build it yourself, as above
-    container_name: fm-radio
+    # image: ghcr.io/<you>/usb-fm-radio:latest    # or build it yourself, as above
+    container_name: usb-fm-radio
     ports:
       - "${RADIO_PORT:-8150}:8150"
     devices:

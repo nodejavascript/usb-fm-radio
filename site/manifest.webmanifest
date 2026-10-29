@@ -1,6 +1,6 @@
 {
-  "name": "fm-radio.nodejavascript.com",
-  "short_name": "FM radio",
+  "name": "usb-fm-radio.nodejavascript.com",
+  "short_name": "USB FM radio",
   "description": "A local web page for a USB FM radio: tune, scan the band with a 19 kHz stereo-pilot test, keep the stations you like.",
   "start_url": "/",
   "scope": "/",

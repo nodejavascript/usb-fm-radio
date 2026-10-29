@@ -1,4 +1,4 @@
-# FM radio in a container
+# USB FM radio in a container
 
 **A receiver should be honest about what it is hearing: a station is told from hiss by evidence and
 not by loudness.** Everything here follows from that. The scan calls a channel a station only when
@@ -23,7 +23,7 @@ The compose file in this repository is the whole recipe: it builds the image, pa
 mounts the audio server and keeps your saved stations in a named volume.
 
 ```bash
-cd fm-radio
+cd usb-fm-radio
 docker compose up -d --build
 # the page is on the host at http://127.0.0.1:8150/
 docker compose logs -f          # says "FM radio page on http://0.0.0.0:8150/" when it is up
@@ -45,22 +45,22 @@ volume away.
 No compose file needed. Build once, then run:
 
 ```bash
-docker build -t fm-radio .
-docker run -d --name fm-radio \
+docker build -t usb-fm-radio .
+docker run -d --name usb-fm-radio \
   --device /dev/radio0:/dev/radio0 \
   -p 8150:8150 \
   -e RADIO_BIND=0.0.0.0 \
   -e RADIO_DATA=/data \
   -e PULSE_SERVER=unix:/pulse/native \
   -e XDG_RUNTIME_DIR=/pulse \
-  -v fm-radio-data:/data \
+  -v usb-fm-radio-data:/data \
   -v "${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/pulse/native:/pulse/native" \
   -v "${HOME}/.config/pulse/cookie:/root/.config/pulse/cookie:ro" \
   --restart unless-stopped \
-  fm-radio
+  usb-fm-radio
 ```
 
-Then `docker logs fm-radio` for the start-up line, and open `http://127.0.0.1:8150/`.
+Then `docker logs usb-fm-radio` for the start-up line, and open `http://127.0.0.1:8150/`.
 
 **`RADIO_BIND=0.0.0.0` is not optional in a container.** A published port arrives from outside the
 container's own loopback, so an app listening on `127.0.0.1` is unreachable no matter what `-p` says.
@@ -90,9 +90,46 @@ cannot supply any of them:**
 
 | Needed | Why |
 |---|---|
-| `/dev/radio0` | the kernel must already drive the stick (for one common stick: `radio_shark` + `tea575x`). A container cannot load a kernel module into a host it does not own. |
+| `/dev/radio0` | the kernel must already drive the stick — **What it drives** below lists the receiver drivers. A container cannot load a kernel module into a host it does not own. |
 | an audio server socket | the app asks *your* PipeWire/PulseAudio to route the radio to the speakers, so the sound comes out of your machine. |
 | the audio cookie | if your server authenticates clients with one. Both are mounted in `docker-compose.yml`. |
+
+## What it drives — the chips and the devices
+
+**No chip is named inside the program.** It talks to whatever the kernel exposes at `/dev/radio0` as a
+V4L2 radio device: it sets a frequency with `v4l2-ctl --set-freq`, reads the device back, and captures
+the receiver's audio from your audio server. Mute and volume are done in the audio server, not in the
+tuner. So the list below is the kernel's own list of FM receiver drivers, not a list the app keeps.
+
+| Driver | The receiver it drives |
+|---|---|
+| `radio-shark` | Griffin radioSHARK, USB (FM tuner `tea575x`) |
+| `shark2` | Griffin radioSHARK2, USB |
+| `radio-si470x-usb`, `radio-si470x-i2c` | Silicon Labs Si4701/4702/4703 FM radios |
+| `radio-si476x` | Silicon Labs Si4761/64/68 AM/FM (I2C, car-radio boards) |
+| `radio-tea5764` | Philips TEA5764 (EZX phones) |
+| `dsbr100` | D-Link DSB-R100 USB FM radio |
+| `radio-raremono` | Thanko Raremono AM/FM/SW, USB |
+| `radio-ma901` | Masterkit MA901 USB FM radio |
+| `radio-mr800` | AverMedia MR 800 USB FM radio |
+| `radio-maxiradio` | Guillemot Maxi Radio FM2000 (PCI card) |
+
+Measured here on one of them — the radioSHARK, through `radio-shark` and `tea575x`. The rest are the
+kernel's own receiver drivers, and every one of them is a receiver: a tuner that takes a frequency and
+demodulated audio to hand to the sound card.
+
+**Not receivers, whatever their name suggests:** `radio-keene` and `si4713` are FM *transmitters*, and
+`tea575x`, `tef6862` and `saa7706h` are tuner sub-devices used *inside* other drivers — none of them
+exposes a `/dev/radioN` of its own.
+
+**Three things will not work, however good the hardware is.**
+
+1. **A mono-only receiver.** The scan's whole test is the 19 kHz stereo pilot, so a tuner that never goes
+   stereo reads as an empty band. The app looks broken when the radio is the limit.
+2. **Anything with no V4L2 radio driver** — sticks driven from userspace over HID (some RDA5807 and
+   TEA5767 modules), and every SDR dongle, which hands over IQ samples and no demodulated audio at all.
+3. **A tuner whose audio never reaches the audio server.** An empty `RADIO_SOURCE` auto-picks the first
+   `alsa_input.usb-…` source, so a card tuner's input has to be named there by hand.
 
 ## Settings
 

@@ -22,7 +22,7 @@ import urllib.error
 import urllib.request
 
 URL = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8155/"
-HOST = "fm-radio.nodejavascript.com"
+HOST = "usb-fm-radio.nodejavascript.com"
 
 # third-party hosts a LINK may point at; a SUBRESOURCE (script/style/img) from any of these is a fault
 OK_LINK_HOSTS = ("nodejavascript.com", "github.com", "openschema.org", "opensource.org", "schema.org")
