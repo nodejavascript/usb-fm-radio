@@ -49,11 +49,16 @@ console.log(`live check — ${BASE}\n`);
 }
 
 // 3 · the icons, the manifest and the crawler files a deployed site must actually serve
+// 🔴 THE ICON SET IS AT THE SITE ROOT, NOT UNDER /img/ — part 15b, and the page declares
+// `./favicon-180.png`. This check asked for `/img/favicon-180.png` and had been failing on
+// deploy day for a shape the site has never had: found 29 October 2026, on the first deploy
+// after the rename, which is the only day `npm run test:live` runs. Only the screenshot and
+// the drawings live under /img/.
 for (const [path, type] of [
-  ["/img/favicon-180.png", "image/png"],
-  ["/img/favicon.svg", "image/svg"],
-  ["/img/favicon.ico", "image/"],
-  ["/img/apple-touch-icon.png", "image/png"],
+  ["/favicon-180.png", "image/png"],
+  ["/favicon.svg", "image/svg"],
+  ["/favicon.ico", "image/"],
+  ["/apple-touch-icon.png", "image/png"],
   ["/img/app.webp", "image/webp"],
   ["/manifest.webmanifest", "json"],
   ["/robots.txt", "text/plain"],
