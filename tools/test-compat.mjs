@@ -23,11 +23,11 @@ const check = (name, ok) => {
   if (!ok) failures++;
 };
 
-function run({ stored, box = true, throwOnRead = false, throwOnWrite = false } = {}) {
+function run({ stored, box = true, authoredOpen = true, throwOnRead = false, throwOnWrite = false } = {}) {
   const store = new Map(stored === undefined ? [] : [["fmradio.compat", stored]]);
   const listeners = {};
   const node = {
-    open: false,
+    open: authoredOpen,
     addEventListener(type, fn) {
       (listeners[type] = listeners[type] || []).push(fn);
     },
@@ -62,7 +62,7 @@ function run({ stored, box = true, throwOnRead = false, throwOnWrite = false } =
 console.log("site.js — the real file, in a stub DOM\n");
 
 let r = run();
-check("first visit (nothing stored) → the list stays as authored, collapsed", r.node.open === false);
+check("first visit (nothing stored) → the list stays as authored, open near the top", r.node.open === true);
 
 r = run({ stored: "open" });
 check("stored 'open' → the list is open", r.node.open === true);
@@ -80,8 +80,8 @@ r.node.open = true;
 r.node.fire("toggle");
 check("opened by the visitor → 'open' is stored", r.store.get("fmradio.compat") === "open");
 
-r = run({ stored: "open", throwOnRead: true, throwOnWrite: true });
-check("private mode (storage throws) → the script does not break", r.node.open === false);
+r = run({ stored: "closed", throwOnRead: true, throwOnWrite: true });
+check("private mode (storage throws) → the script does not break", r.node.open === true);
 r.node.fire("toggle");
 check("private mode (storage throws) → the toggle still fires without an error", true);
 

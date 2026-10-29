@@ -75,6 +75,11 @@ def main() -> int:
             and "compat-hint" in html[details.start() : details.start() + 600],
         )
     check("site.js loads, deferred, to remember the open state", "site.js" in html and "defer" in html)
+    check(
+        "the list is OPEN by default, so it is read at the top of the page",
+        bool(details) and " open" in details.group(0),
+        details.group(0) if details else "",
+    )
     # 🔴 A <details> LEFT UNCLOSED SWALLOWS THE REST OF THE PAGE. Measured 29 October 2026: the
     # compatibility panel was inserted without its closing tag, every section after it rendered
     # inside a collapsed element, and the page ended at the footer — while every other check here
