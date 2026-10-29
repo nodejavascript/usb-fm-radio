@@ -78,7 +78,7 @@
                 "name": "Which radios does it work with?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Any receiver the Linux kernel already exposes as a V4L2 radio device at /dev/radio0 — the driver, not the brand, decides. The container cannot load a kernel module, so it must already be working on the host. The ten receiver drivers it is built to talk to are listed under What it plugs into."
+                  "text": "Any receiver the Linux kernel already exposes as a V4L2 radio device at /dev/radio0 — the driver, not the brand, decides. The container cannot load a kernel module, so it must already be working on the host. The USB receivers it can drive, with their USB IDs, are listed under USB devices it can drive."
                 }
               }
             ]
@@ -377,52 +377,60 @@ docker run -d --name usb-fm-radio \
       </section>
 
       <section id="hardware">
-        <h2>What it plugs into</h2>
+        <h2>USB devices it can drive</h2>
         <p class="body">
-          <b>No chip is named inside the program.</b> It talks to whatever the kernel exposes at
-          <code>/dev/radio0</code> as a V4L2 radio device: it sets a frequency with
-          <code>v4l2-ctl --set-freq</code>, reads the device back, and captures the receiver's audio
-          from your audio server. Mute and volume happen in the audio server, not in the tuner. So the
-          list below is <i>the kernel's</i> list of FM receiver drivers, and every one of them is a
-          receiver: a tuner that takes a frequency, and demodulated audio to hand to the sound card.
+          <b>Plug it in, and the kernel does the rest.</b> The app needs two things from the machine and
+          asks for neither by brand: a USB receiver whose driver exposes <code>/dev/radio0</code> as a
+          V4L2 radio, and that receiver's audio arriving as an input your audio server can capture. It
+          then sets a frequency with <code>v4l2-ctl --set-freq</code>, reads the device back, and
+          records with <code>parec</code>. Mute and volume happen in the audio server, not the tuner.
         </p>
+        <h3>USB receivers — these are the ones you can buy and plug in</h3>
         <div class="tablewrap">
           <table>
             <thead>
-              <tr><th>Driver</th><th>The receiver it drives</th></tr>
+              <tr><th>USB ID</th><th>Device</th><th>Driver</th></tr>
             </thead>
             <tbody>
-              <tr><td><code>radio-shark</code></td><td>Griffin radioSHARK, USB (FM tuner <code>tea575x</code>)</td></tr>
-              <tr><td><code>shark2</code></td><td>Griffin radioSHARK2, USB</td></tr>
-              <tr><td><code>radio-si470x-usb</code> · <code>radio-si470x-i2c</code></td><td>Silicon Labs Si4701/4702/4703 FM radios</td></tr>
-              <tr><td><code>radio-si476x</code></td><td>Silicon Labs Si4761/64/68 AM/FM (I2C, car-radio boards)</td></tr>
-              <tr><td><code>radio-tea5764</code></td><td>Philips TEA5764 (EZX phones)</td></tr>
-              <tr><td><code>dsbr100</code></td><td>D-Link DSB-R100 USB FM radio</td></tr>
-              <tr><td><code>radio-raremono</code></td><td>Thanko Raremono AM/FM/SW, USB</td></tr>
-              <tr><td><code>radio-ma901</code></td><td>Masterkit MA901 USB FM radio</td></tr>
-              <tr><td><code>radio-mr800</code></td><td>AverMedia MR 800 USB FM radio</td></tr>
-              <tr><td><code>radio-maxiradio</code></td><td>Guillemot Maxi Radio FM2000 (PCI card)</td></tr>
+              <tr><td><code>077d:627a</code></td><td>Griffin radioSHARK, and the radioSHARK2</td><td><code>radio-shark</code> · <code>shark2</code></td></tr>
+              <tr><td><code>04b4:1002</code></td><td>D-Link DSB-R100 USB FM radio</td><td><code>dsbr100</code></td></tr>
+              <tr><td><code>12cf:7111</code> · <code>10c5:819a</code></td><td>Silicon Labs Si470x USB FM radios — the reference stick and the generic Si4703 modules sold under it</td><td><code>radio-si470x-usb</code></td></tr>
+              <tr><td><code>16c0:05df</code></td><td>Masterkit MA901 USB FM radio</td><td><code>radio-ma901</code></td></tr>
+              <tr><td><code>07ca:b800</code></td><td>AverMedia MR 800 USB FM radio</td><td><code>radio-mr800</code></td></tr>
+              <tr><td><code>10c4:818a</code></td><td>Thanko Raremono AM/FM/SW receiver</td><td><code>radio-raremono</code></td></tr>
             </tbody>
           </table>
         </div>
         <p class="body small">
-          Measured here on one of them — the radioSHARK, through <code>radio-shark</code> and
-          <code>tea575x</code>. The rest are the kernel's receiver drivers. <b>Not receivers, whatever
-          their name suggests:</b> <code>radio-keene</code> and <code>si4713</code> are FM
-          <i>transmitters</i>, and <code>tea575x</code>, <code>tef6862</code> and <code>saa7706h</code>
-          are tuner sub-devices used inside other drivers — none of them exposes a
-          <code>/dev/radioN</code> of its own.
+          Measured here on the radioSHARK, which is the one on this machine. <code>lsusb</code> prints the
+          ID in the same form, so a stick can be identified before it is plugged in. <b>A single USB ID
+          can be shared:</b> the radioSHARK and the radioSHARK2 both answer to <code>077d:627a</code>, and
+          two drivers claim it.
         </p>
+        <h3>Not USB, and not receivers — so not this app</h3>
+        <div class="tablewrap">
+          <table>
+            <thead>
+              <tr><th>Device or chip</th><th>What it is</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Guillemot Maxi Radio FM2000</td><td>a <b>PCI card</b> — it works, but it is not a USB device (<code>radio-maxiradio</code>)</td></tr>
+              <tr><td>Silicon Labs Si4761/64/68, Philips TEA5764</td><td><b>I2C tuner chips</b> on somebody's board, not a stick you plug in</td></tr>
+              <tr><td>Keene FM transmitter (<code>046d:0a0e</code>), Silicon Labs Si4713</td><td>FM <b>transmitters</b> — they broadcast, they do not receive</td></tr>
+              <tr><td><code>tea575x</code>, <code>tef6862</code>, <code>saa7706h</code></td><td>tuner <b>sub-devices</b> used inside other drivers; no <code>/dev/radioN</code> of their own</td></tr>
+            </tbody>
+          </table>
+        </div>
         <div class="cards">
           <article>
-            <h3>A mono receiver would read as an empty band</h3>
+            <h3>A mono receiver reads as an empty band</h3>
             <p>
               The scan's whole test is the 19 kHz stereo pilot, so a tuner that never goes stereo has
               nothing for it to find. The page would look broken when the radio is the limit.
             </p>
           </article>
           <article>
-            <h3>No V4L2 driver, no support</h3>
+            <h3>No USB ID on this page, no support</h3>
             <p>
               Sticks driven from userspace over HID — some <code>RDA5807</code> and
               <code>TEA5767</code> modules — never appear as <code>/dev/radio0</code>. Neither does any
@@ -433,8 +441,8 @@ docker run -d --name usb-fm-radio \
             <h3>The sound has to reach the audio server</h3>
             <p>
               An empty <code>RADIO_SOURCE</code> auto-picks the first <code>alsa_input.usb-…</code>
-              source, so a card tuner's input has to be named there by hand. A tuner whose audio goes
-              nowhere is a tuner this app cannot hear.
+              source, so a card tuner's input has to be named there by hand. A receiver whose audio goes
+              nowhere is one this app cannot hear.
             </p>
           </article>
         </div>
@@ -492,8 +500,8 @@ docker run -d --name usb-fm-radio \
           <dd>
             Any receiver the Linux kernel already exposes as a V4L2 radio device at
             <code>/dev/radio0</code> — the driver, not the brand, decides. The container cannot load a
-            kernel module, so it has to be working on the host already. The ten receiver drivers it is
-            built to talk to are listed under <a href="#hardware">What it plugs into</a>.
+            kernel module, so it has to be working on the host already. The USB receivers it can drive —
+            with their USB IDs — are listed under <a href="#hardware">USB devices it can drive</a>.
           </dd>
           <dt>What is it written in?</dt>
           <dd>

@@ -94,33 +94,37 @@ cannot supply any of them:**
 | an audio server socket | the app asks *your* PipeWire/PulseAudio to route the radio to the speakers, so the sound comes out of your machine. |
 | the audio cookie | if your server authenticates clients with one. Both are mounted in `docker-compose.yml`. |
 
-## What it drives — the chips and the devices
+## What it drives — the USB devices, and the chips
 
-**No chip is named inside the program.** It talks to whatever the kernel exposes at `/dev/radio0` as a
-V4L2 radio device: it sets a frequency with `v4l2-ctl --set-freq`, reads the device back, and captures
-the receiver's audio from your audio server. Mute and volume are done in the audio server, not in the
-tuner. So the list below is the kernel's own list of FM receiver drivers, not a list the app keeps.
+**Plug it in, and the kernel does the rest.** The app needs two things and asks for neither by brand: a
+USB receiver whose driver exposes `/dev/radio0` as a V4L2 radio, and that receiver's audio arriving as an
+input the audio server can capture. It sets a frequency with `v4l2-ctl --set-freq`, reads the device back,
+and records with `parec`.
 
-| Driver | The receiver it drives |
+### USB receivers — the ones you can buy and plug in
+
+| USB ID | Device | Driver |
+|---|---|---|
+| `077d:627a` | Griffin radioSHARK, and the radioSHARK2 | `radio-shark` · `shark2` |
+| `04b4:1002` | D-Link DSB-R100 USB FM radio | `dsbr100` |
+| `12cf:7111` · `10c5:819a` | Silicon Labs Si470x USB FM radios — the reference stick and the generic Si4703 modules sold under it | `radio-si470x-usb` |
+| `16c0:05df` | Masterkit MA901 USB FM radio | `radio-ma901` |
+| `07ca:b800` | AverMedia MR 800 USB FM radio | `radio-mr800` |
+| `10c4:818a` | Thanko Raremono AM/FM/SW receiver | `radio-raremono` |
+
+The IDs are the drivers' own USB aliases (`modinfo -F alias <driver>`), and `lsusb` prints the same form,
+so a stick can be identified before it is plugged in. A single ID can be shared: the radioSHARK and the
+radioSHARK2 both answer to `077d:627a`, and two drivers claim it. Measured here on the radioSHARK, which is
+the one on this machine.
+
+### Not USB, and not receivers — so not this app
+
+| Device or chip | What it is |
 |---|---|
-| `radio-shark` | Griffin radioSHARK, USB (FM tuner `tea575x`) |
-| `shark2` | Griffin radioSHARK2, USB |
-| `radio-si470x-usb`, `radio-si470x-i2c` | Silicon Labs Si4701/4702/4703 FM radios |
-| `radio-si476x` | Silicon Labs Si4761/64/68 AM/FM (I2C, car-radio boards) |
-| `radio-tea5764` | Philips TEA5764 (EZX phones) |
-| `dsbr100` | D-Link DSB-R100 USB FM radio |
-| `radio-raremono` | Thanko Raremono AM/FM/SW, USB |
-| `radio-ma901` | Masterkit MA901 USB FM radio |
-| `radio-mr800` | AverMedia MR 800 USB FM radio |
-| `radio-maxiradio` | Guillemot Maxi Radio FM2000 (PCI card) |
-
-Measured here on one of them — the radioSHARK, through `radio-shark` and `tea575x`. The rest are the
-kernel's own receiver drivers, and every one of them is a receiver: a tuner that takes a frequency and
-demodulated audio to hand to the sound card.
-
-**Not receivers, whatever their name suggests:** `radio-keene` and `si4713` are FM *transmitters*, and
-`tea575x`, `tef6862` and `saa7706h` are tuner sub-devices used *inside* other drivers — none of them
-exposes a `/dev/radioN` of its own.
+| Guillemot Maxi Radio FM2000 | a **PCI card** — it works, but it is not a USB device (`radio-maxiradio`) |
+| Silicon Labs Si4761/64/68, Philips TEA5764 | **I2C tuner chips** on somebody's board, not a stick you plug in |
+| Keene FM transmitter (`046d:0a0e`), Silicon Labs Si4713 | FM **transmitters** — they broadcast, they do not receive |
+| `tea575x`, `tef6862`, `saa7706h` | tuner **sub-devices** used inside other drivers; no `/dev/radioN` of their own |
 
 **Three things will not work, however good the hardware is.**
 
@@ -128,7 +132,7 @@ exposes a `/dev/radioN` of its own.
    stereo reads as an empty band. The app looks broken when the radio is the limit.
 2. **Anything with no V4L2 radio driver** — sticks driven from userspace over HID (some RDA5807 and
    TEA5767 modules), and every SDR dongle, which hands over IQ samples and no demodulated audio at all.
-3. **A tuner whose audio never reaches the audio server.** An empty `RADIO_SOURCE` auto-picks the first
+3. **A receiver whose audio never reaches the audio server.** An empty `RADIO_SOURCE` auto-picks the first
    `alsa_input.usb-…` source, so a card tuner's input has to be named there by hand.
 
 ## Settings
