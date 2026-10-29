@@ -778,3 +778,69 @@ tbody tr:last-child td {
     scroll-behavior: auto;
   }
 }
+
+/* 🔴 THE COMPATIBILITY LIST — a native <details> under the two hero buttons, so it works with
+ * JavaScript blocked and only its remembered state needs a script. The marker is drawn as a
+ * rotating chevron in this site's own amber; the summary is a real <h2> so the heading outline
+ * still reads correctly to a screen reader and to the crawler. */
+.compat {
+  margin: 26px 0 8px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--card);
+}
+.compat > summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 14px;
+  padding: 16px 20px;
+  cursor: pointer;
+  list-style: none;
+  border-radius: 14px;
+}
+.compat > summary::-webkit-details-marker {
+  display: none;
+}
+.compat > summary:hover,
+.compat > summary:focus-visible {
+  background: rgba(245, 165, 36, 0.06);
+}
+.compat > summary:focus-visible {
+  outline: 2px solid var(--theme);
+  outline-offset: 2px;
+}
+.compat > summary h2 {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.compat > summary h2::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-right: 2px solid var(--theme);
+  border-bottom: 2px solid var(--theme);
+  transform: rotate(-45deg);
+  transition: transform 0.18s ease;
+  flex: none;
+  margin-top: -3px;
+}
+.compat[open] > summary h2::before {
+  transform: rotate(45deg);
+}
+.compat-hint {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+.compat[open] > summary {
+  border-bottom: 1px solid var(--line);
+  border-radius: 14px 14px 0 0;
+}
+.compat-in {
+  padding: 4px 20px 20px;
+}
+.compat-in .body:first-child {
+  margin-top: 14px;
+}

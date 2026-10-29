@@ -30,4 +30,25 @@
       ta.remove();
     }
   });
+  /* 🔴 THE COMPATIBILITY LIST REMEMBERS ITS OWN STATE. Stored where the cookie panel stores its
+   * answer — localStorage, because this site sets no cookies at all — so "remembered like the
+   * cookie settings" does not mean a cookie appears on a site that promises none. The element is a
+   * native <details>, so with this script blocked it still opens and closes; all that is lost is
+   * the memory. No stored value leaves it as authored (collapsed). */
+  var COMPAT_KEY = "fmradio.compat";
+  var box = document.querySelector("[data-compat]");
+  if (box) {
+    try {
+      var saved = localStorage.getItem(COMPAT_KEY);
+      if (saved === "open") box.open = true;
+      else if (saved === "closed") box.open = false;
+    } catch (e) {
+      /* private mode, or storage denied: the list still works, it just forgets */
+    }
+    box.addEventListener("toggle", function () {
+      try {
+        localStorage.setItem(COMPAT_KEY, box.open ? "open" : "closed");
+      } catch (e) {}
+    });
+  }
 })();

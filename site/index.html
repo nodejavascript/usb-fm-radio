@@ -203,6 +203,87 @@
         </figure>
       </section>
 
+      <!-- 🔴 THE COMPATIBILITY LIST SITS UNDER THE TWO BUTTONS, COLLAPSED, AND ITS STATE IS
+           REMEMBERED (George, 29 October 2026: "put the compatability table under get the source and
+           make it collapsable by the user, save in cookie settings"). Native <details>, so it still
+           opens with JavaScript blocked; `site.js` only remembers the choice. -->
+      <details class="compat" id="hardware" data-compat>
+        <summary>
+          <h2>USB devices it can drive</h2>
+          <span class="compat-hint">six receivers you can plug in — open for the USB IDs, and for what will not work</span>
+        </summary>
+        <div class="compat-in">
+        <p class="body">
+          <b>Plug it in, and the kernel does the rest.</b> The app needs two things from the machine and
+          asks for neither by brand: a USB receiver whose driver exposes <code>/dev/radio0</code> as a
+          V4L2 radio, and that receiver's audio arriving as an input your audio server can capture. It
+          then sets a frequency with <code>v4l2-ctl --set-freq</code>, reads the device back, and
+          records with <code>parec</code>. Mute and volume happen in the audio server, not the tuner.
+        </p>
+        <h3>USB receivers — these are the ones you can buy and plug in</h3>
+        <div class="tablewrap">
+          <table>
+            <thead>
+              <tr><th>USB ID</th><th>Device</th><th>Driver</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>077d:627a</code></td><td>Griffin radioSHARK, and the radioSHARK2</td><td><code>radio-shark</code> · <code>shark2</code></td></tr>
+              <tr><td><code>04b4:1002</code></td><td>D-Link DSB-R100 USB FM radio</td><td><code>dsbr100</code></td></tr>
+              <tr><td><code>12cf:7111</code> · <code>10c5:819a</code></td><td>Silicon Labs Si470x USB FM radios — the reference stick and the generic Si4703 modules sold under it</td><td><code>radio-si470x-usb</code></td></tr>
+              <tr><td><code>16c0:05df</code></td><td>Masterkit MA901 USB FM radio</td><td><code>radio-ma901</code></td></tr>
+              <tr><td><code>07ca:b800</code></td><td>AverMedia MR 800 USB FM radio</td><td><code>radio-mr800</code></td></tr>
+              <tr><td><code>10c4:818a</code></td><td>Thanko Raremono AM/FM/SW receiver</td><td><code>radio-raremono</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="body small">
+          Measured here on the radioSHARK, which is the one on this machine. <code>lsusb</code> prints the
+          ID in the same form, so a stick can be identified before it is plugged in. <b>A single USB ID
+          can be shared:</b> the radioSHARK and the radioSHARK2 both answer to <code>077d:627a</code>, and
+          two drivers claim it.
+        </p>
+        <h3>Not USB, and not receivers — so not this app</h3>
+        <div class="tablewrap">
+          <table>
+            <thead>
+              <tr><th>Device or chip</th><th>What it is</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Guillemot Maxi Radio FM2000</td><td>a <b>PCI card</b> — it works, but it is not a USB device (<code>radio-maxiradio</code>)</td></tr>
+              <tr><td>Silicon Labs Si4761/64/68, Philips TEA5764</td><td><b>I2C tuner chips</b> on somebody's board, not a stick you plug in</td></tr>
+              <tr><td>Keene FM transmitter (<code>046d:0a0e</code>), Silicon Labs Si4713</td><td>FM <b>transmitters</b> — they broadcast, they do not receive</td></tr>
+              <tr><td><code>tea575x</code>, <code>tef6862</code>, <code>saa7706h</code></td><td>tuner <b>sub-devices</b> used inside other drivers; no <code>/dev/radioN</code> of their own</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="cards">
+          <article>
+            <h3>A mono receiver reads as an empty band</h3>
+            <p>
+              The scan's whole test is the 19 kHz stereo pilot, so a tuner that never goes stereo has
+              nothing for it to find. The page would look broken when the radio is the limit.
+            </p>
+          </article>
+          <article>
+            <h3>No USB ID on this page, no support</h3>
+            <p>
+              Sticks driven from userspace over HID — some <code>RDA5807</code> and
+              <code>TEA5767</code> modules — never appear as <code>/dev/radio0</code>. Neither does any
+              SDR dongle: it hands over IQ samples and no demodulated audio at all.
+            </p>
+          </article>
+          <article>
+            <h3>The sound has to reach the audio server</h3>
+            <p>
+              An empty <code>RADIO_SOURCE</code> auto-picks the first <code>alsa_input.usb-…</code>
+              source, so a card tuner's input has to be named there by hand. A receiver whose audio goes
+              nowhere is one this app cannot hear.
+            </p>
+          </article>
+        </div>
+        </div>
+      </details>
+
       <section id="app">
         <h2>The whole app, in one picture</h2>
         <p class="body">
@@ -373,78 +454,6 @@ docker run -d --name usb-fm-radio \
               </tr>
             </tbody>
           </table>
-        </div>
-      </section>
-
-      <section id="hardware">
-        <h2>USB devices it can drive</h2>
-        <p class="body">
-          <b>Plug it in, and the kernel does the rest.</b> The app needs two things from the machine and
-          asks for neither by brand: a USB receiver whose driver exposes <code>/dev/radio0</code> as a
-          V4L2 radio, and that receiver's audio arriving as an input your audio server can capture. It
-          then sets a frequency with <code>v4l2-ctl --set-freq</code>, reads the device back, and
-          records with <code>parec</code>. Mute and volume happen in the audio server, not the tuner.
-        </p>
-        <h3>USB receivers — these are the ones you can buy and plug in</h3>
-        <div class="tablewrap">
-          <table>
-            <thead>
-              <tr><th>USB ID</th><th>Device</th><th>Driver</th></tr>
-            </thead>
-            <tbody>
-              <tr><td><code>077d:627a</code></td><td>Griffin radioSHARK, and the radioSHARK2</td><td><code>radio-shark</code> · <code>shark2</code></td></tr>
-              <tr><td><code>04b4:1002</code></td><td>D-Link DSB-R100 USB FM radio</td><td><code>dsbr100</code></td></tr>
-              <tr><td><code>12cf:7111</code> · <code>10c5:819a</code></td><td>Silicon Labs Si470x USB FM radios — the reference stick and the generic Si4703 modules sold under it</td><td><code>radio-si470x-usb</code></td></tr>
-              <tr><td><code>16c0:05df</code></td><td>Masterkit MA901 USB FM radio</td><td><code>radio-ma901</code></td></tr>
-              <tr><td><code>07ca:b800</code></td><td>AverMedia MR 800 USB FM radio</td><td><code>radio-mr800</code></td></tr>
-              <tr><td><code>10c4:818a</code></td><td>Thanko Raremono AM/FM/SW receiver</td><td><code>radio-raremono</code></td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p class="body small">
-          Measured here on the radioSHARK, which is the one on this machine. <code>lsusb</code> prints the
-          ID in the same form, so a stick can be identified before it is plugged in. <b>A single USB ID
-          can be shared:</b> the radioSHARK and the radioSHARK2 both answer to <code>077d:627a</code>, and
-          two drivers claim it.
-        </p>
-        <h3>Not USB, and not receivers — so not this app</h3>
-        <div class="tablewrap">
-          <table>
-            <thead>
-              <tr><th>Device or chip</th><th>What it is</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>Guillemot Maxi Radio FM2000</td><td>a <b>PCI card</b> — it works, but it is not a USB device (<code>radio-maxiradio</code>)</td></tr>
-              <tr><td>Silicon Labs Si4761/64/68, Philips TEA5764</td><td><b>I2C tuner chips</b> on somebody's board, not a stick you plug in</td></tr>
-              <tr><td>Keene FM transmitter (<code>046d:0a0e</code>), Silicon Labs Si4713</td><td>FM <b>transmitters</b> — they broadcast, they do not receive</td></tr>
-              <tr><td><code>tea575x</code>, <code>tef6862</code>, <code>saa7706h</code></td><td>tuner <b>sub-devices</b> used inside other drivers; no <code>/dev/radioN</code> of their own</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="cards">
-          <article>
-            <h3>A mono receiver reads as an empty band</h3>
-            <p>
-              The scan's whole test is the 19 kHz stereo pilot, so a tuner that never goes stereo has
-              nothing for it to find. The page would look broken when the radio is the limit.
-            </p>
-          </article>
-          <article>
-            <h3>No USB ID on this page, no support</h3>
-            <p>
-              Sticks driven from userspace over HID — some <code>RDA5807</code> and
-              <code>TEA5767</code> modules — never appear as <code>/dev/radio0</code>. Neither does any
-              SDR dongle: it hands over IQ samples and no demodulated audio at all.
-            </p>
-          </article>
-          <article>
-            <h3>The sound has to reach the audio server</h3>
-            <p>
-              An empty <code>RADIO_SOURCE</code> auto-picks the first <code>alsa_input.usb-…</code>
-              source, so a card tuner's input has to be named there by hand. A receiver whose audio goes
-              nowhere is one this app cannot hear.
-            </p>
-          </article>
         </div>
       </section>
 

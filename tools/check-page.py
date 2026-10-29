@@ -57,6 +57,34 @@ def main() -> int:
     h1s = re.findall(r"<h1[^>]*>", html)
     check("exactly one <h1>", len(h1s) == 1, "%d found" % len(h1s))
 
+    # 🔴 THE COMPATIBILITY LIST IS A NATIVE <details>, SITS UNDER THE HERO, AND REMEMBERS ITSELF.
+    # George, 29 October 2026: "put the compatability table under get the source and make it
+    # collapsable by the user, save in cookie settings". A <details> is what makes it open with
+    # JavaScript blocked; a div and a click handler would be a page that only works with a script.
+    details = re.search(r"<details[^>]*data-compat[^>]*>", html)
+    check("the compatibility list is a native <details>", bool(details), "no <details data-compat>")
+    if details:
+        check(
+            "it sits under the hero, before the app section",
+            html.index(details.group(0)) < html.index('<section id="app">'),
+            "it is not between the hero and #app",
+        )
+        check(
+            "its summary carries the heading and a hint",
+            "<summary>" in html[details.start() : details.start() + 600]
+            and "compat-hint" in html[details.start() : details.start() + 600],
+        )
+    check("site.js loads, deferred, to remember the open state", "site.js" in html and "defer" in html)
+    # 🔴 A <details> LEFT UNCLOSED SWALLOWS THE REST OF THE PAGE. Measured 29 October 2026: the
+    # compatibility panel was inserted without its closing tag, every section after it rendered
+    # inside a collapsed element, and the page ended at the footer — while every other check here
+    # still passed, because none of them counted tags. So the tags are counted now.
+    # a COMMENT may name a tag (this page's own comments do, twice), and a comment is not markup
+    stripped = re.sub(r"<!--.*?-->", "", html, flags=re.S)
+    for tag in ("details", "section", "table", "article", "div"):
+        opened, closed = stripped.count("<%s" % tag), stripped.count("</%s>" % tag)
+        check("every <%s> is closed" % tag, opened == closed, "%d opened, %d closed" % (opened, closed))
+
     order = re.findall(r'<link rel="(?:icon|apple-touch-icon)"[^>]*href="([^"]+)"', html)
     check(
         "the 180-pixel PNG is the FIRST icon declared (SVG is not a format Google reads)",
